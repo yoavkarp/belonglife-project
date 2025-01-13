@@ -25,4 +25,20 @@ describe("DebounceInput", () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange).toHaveBeenCalledWith("abc");
     });
+
+    it("does not call onChange if input is cleared before the delay", () => {
+        const onChange = jest.fn();
+        render(<DebounceInput onTimeout={onChange} delay={400} />);
+
+        const input = screen.getByTestId("search-input");
+
+        // Simulate typing and clearing the input quickly
+        fireEvent.change(input, { target: { value: "text" } });
+        fireEvent.change(input, { target: { value: "" } });
+
+        // Fast forward time
+        jest.advanceTimersByTime(400);
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
 });

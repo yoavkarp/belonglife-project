@@ -1,9 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function useDebounce(callback: () => void, deps: unknown[] = [], timeout: number = 350) {
+export default function useDebounce(callback: () => void, textState: string = "", timeout: number = 350) {
+
+    const [prevTextState, setPrevTextState] = useState<string>(textState);
+
     useEffect(() => {
 
+        if (prevTextState === textState) {
+            return;
+        }
+
         const handler = setTimeout(() => {
+            setPrevTextState(textState)
             callback()
         }, timeout);
 
@@ -12,5 +20,5 @@ export default function useDebounce(callback: () => void, deps: unknown[] = [], 
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [timeout, callback, ...deps])
+    }, [textState])
 }
