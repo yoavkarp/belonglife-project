@@ -15,6 +15,7 @@ const CountryList: React.FC<CountryListProps> = (props) => {
     return (
         <div className="country-list">
             <FixedSizeList
+                // react-window list
                 className="country-list"
                 itemData={countries}
                 height={500}

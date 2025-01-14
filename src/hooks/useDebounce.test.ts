@@ -6,14 +6,14 @@ jest.useFakeTimers();
 describe("useDebounce", () => {
     it("clears the timeout when dependencies change", () => {
         const callback = jest.fn();
-        const { rerender } = renderHook(({ text, timeout }) =>
-            useDebounce(callback, text, timeout), {
-            initialProps: { text: "", timeout: 350 },
+        const { rerender } = renderHook(({ query, timeout }) =>
+            useDebounce(callback, query, timeout), {
+            initialProps: { query: "", timeout: 350 },
         }
         );
 
         // Change dependencies
-        rerender({ text: "a", timeout: 350 });
+        rerender({ query: "a", timeout: 350 });
 
         // Fast forward time
         act(() => {
@@ -33,5 +33,30 @@ describe("useDebounce", () => {
         });
 
         expect(callback).not.toHaveBeenCalled();
+    });
+
+    it("does not call the callback if same query called before timeout", () => {
+        const callback = jest.fn();
+        const { rerender } = renderHook(({ query, timeout }) =>
+            useDebounce(callback, query, timeout), {
+            initialProps: { query: "", timeout: 350 },
+        }
+        );
+
+        // Change dependencies
+        rerender({ query: "a", timeout: 350 });
+
+        // Fast forward time
+        act(() => {
+            jest.advanceTimersByTime(100);
+        });
+
+        rerender({ query: "", timeout: 350 });
+
+        act(() => {
+            jest.advanceTimersByTime(350);
+        });
+
+        expect(callback).not.toBeCalled();
     });
 });

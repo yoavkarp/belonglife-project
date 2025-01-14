@@ -8,16 +8,16 @@ interface DebounceInputProps {
 }
 
 const DebounceInput: React.FC<DebounceInputProps> = (props) => {
-    const [text, setText] = useState("");
+    const [query, setQuery] = useState("");
 
     const { delay = 350, onTimeout, inputProps } = props;
 
     useDebounce(() => {
-        onTimeout?.(text);
-    }, text, delay);
+        onTimeout?.(query);
+    }, query, delay);
 
     return (
-        <input data-testid="search-input" type="text" placeholder="Search..." onChange={(e) => setText(e.target.value.trim())} {...inputProps} />
+        <input type="text" placeholder="Search..." onChange={(e) => setQuery(e.target.value.trim())} {...inputProps} />
     );
 }
 

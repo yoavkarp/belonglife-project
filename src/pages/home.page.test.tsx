@@ -15,7 +15,7 @@ const countriesMock: Country[] = [
         flags: {
             png: "https://restcountries.com/data/isr.png",
             svg: "https://restcountries.com/data/isr.svg"
-        }
+        },
     },
     {
         name: {
@@ -26,7 +26,7 @@ const countriesMock: Country[] = [
         flags: {
             png: "https://restcountries.com/data/isr.png",
             svg: "https://restcountries.com/data/isr.svg"
-        }
+        },
     },
     {
         name: {
@@ -51,6 +51,19 @@ const mockedUseCountriesIdb = useCountriesIdb as jest.Mock;
 
 const mockCountries = List(countriesMock);
 
+const mockIdbCountries = List([{
+    name: {
+        common: "Israel2",
+        official: "Israel2"
+    },
+    cca3: "IS2",
+    flags: {
+        png: "https://restcountries.com/data/isr.png",
+        svg: "https://restcountries.com/data/isr.svg"
+    },
+    lastClickedTimestamp: 10
+} satisfies Country])
+
 beforeEach(() => {
     mockedUseFetchCountries.mockReturnValue({
         isLoading: false,
@@ -61,25 +74,23 @@ beforeEach(() => {
     mockedUseCountriesIdb.mockReturnValue({
         isLoading: false,
         error: null,
-        countries: [],
-        getCountry: jest.fn(),
+        countries: mockIdbCountries,
+        getCountry: jest.fn((arg) => { return mockIdbCountries.find((c) => c.cca3 === arg) }),
         saveCountry: jest.fn()
-    })
+    });
 })
 
 describe("HomePage", () => {
 
-    it("showing search input", () => {
+    it("rendering search input", () => {
         render(<HomePage />);
-        expect(screen.getByTestId("search-input")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("Search...")).toBeInTheDocument();
     });
 
-    it("showing countries list", async () => {
+    it("rendering countries list", async () => {
         render(<HomePage />);
 
-        await act(async () => { return null; });
-
-        const input = screen.getByTestId("search-input");
+        const input = screen.getByPlaceholderText("Search...");
 
         fireEvent.change(input, { target: { value: "Israel1" } });
 
@@ -90,7 +101,7 @@ describe("HomePage", () => {
 
         render(<HomePage />);
 
-        const input = screen.getByTestId("search-input");
+        const input = screen.getByPlaceholderText("Search...");
 
         fireEvent.change(input, { target: { value: "Israel1" } });
 
@@ -103,5 +114,13 @@ describe("HomePage", () => {
         expect(screen.queryByText("Israel3")).not.toBeInTheDocument();
 
     });
+
+    it("sorts the countries by last clicked timestamp", async () => {
+        render(<HomePage />);
+        const items = screen.getAllByText("Israel2");
+        expect(items.length).toBe(1);
+        const items_sorted = screen.getAllByText("Israel", { exact: false });
+        expect(items_sorted[0].textContent).toBe("Israel2");
+    })
 
 });

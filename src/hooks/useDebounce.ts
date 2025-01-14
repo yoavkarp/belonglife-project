@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
 
-export default function useDebounce(callback: () => void, textState: string = "", timeout: number = 350) {
+export default function useDebounce(callback: () => void, query: string = "", timeout: number = 350) {
 
-    const [prevTextState, setPrevTextState] = useState<string>(textState);
+    const [prevQuery, setPrevQuery] = useState<string>(query);
 
     useEffect(() => {
 
-        if (prevTextState === textState) {
+        // if previous text state is the same as current, do nothing
+        if (prevQuery === query) {
             return;
         }
 
-        const handler = setTimeout(() => {
-            setPrevTextState(textState)
+        const timeoutId = setTimeout(() => {
+            setPrevQuery(query)
             callback()
         }, timeout);
 
         return () => {
-            clearTimeout(handler)
+            clearTimeout(timeoutId)
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [textState])
+    }, [query])
 }

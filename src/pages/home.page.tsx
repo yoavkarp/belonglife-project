@@ -11,21 +11,25 @@ const HomePage = () => {
     const countriesApi = useFetchCountries();
     const [filteredText, setFilteredText] = useState<string>("");
     const countriesIdb = useCountriesIdb();
-    const sortedCountries = useMemo<List<Country>>(() => countriesApi.countries?.sort((a, b) => (countriesIdb.getCountry(b.cca3)?.lastClickedTimestamp || -1) - (countriesIdb.getCountry(a.cca3)?.lastClickedTimestamp || -1)) || List(), [countriesApi, countriesIdb])
+    const sortedCountries = useMemo<List<Country>>(() => {
+        const sorted = countriesApi.countries?.sort((a, b) => (countriesIdb.getCountry(b.cca3)?.lastClickedTimestamp || 0) - (countriesIdb.getCountry(a.cca3)?.lastClickedTimestamp || 0)) || List();
+        return sorted;
+    }, [countriesApi, countriesIdb])
 
     const filterCountries = useCallback((bytext: string) => {
-        return sortedCountries.filter(country => country.name.common.toLowerCase().includes(bytext.toLowerCase()) || country.name.official.toLowerCase().includes(bytext.toLowerCase()));
+        const byTextFormatted = bytext.trim().toLowerCase();
+        return sortedCountries.filter(country => country.name.common.toLowerCase().includes(byTextFormatted) || country.name.official.toLowerCase().includes(byTextFormatted));
     }, [sortedCountries]);
 
     const filteredCountries = useMemo(() => filterCountries(filteredText), [filteredText, filterCountries]);
 
     const handleCountryClick = useCallback(async (country: Country) => {
-        await countriesIdb.saveCountry({
+        countriesIdb.saveCountry({
             ...country,
             lastClickedTimestamp: Date.now()
         })
-
-        window.location.href = country.flags.svg;
+        window.open(country.flags.svg, "_blank", "noopener,noreferrer");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const loading = countriesIdb.isLoading || countriesApi.isLoading;
@@ -44,7 +48,7 @@ const HomePage = () => {
 
     return (
         <div className="page-container">
-            <DebounceInput data-testid="search-input" onTimeout={setFilteredText} inputProps={{ className: "search" }} />
+            <DebounceInput onTimeout={setFilteredText} inputProps={{ className: "search" }} />
             <CountryList countries={filteredCountries} onClickItem={handleCountryClick} />
         </div>
     );

@@ -1,5 +1,4 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import DebounceInput from "./DebounceInput";
 
 jest.useFakeTimers();
@@ -17,11 +16,16 @@ describe("DebounceInput", () => {
         fireEvent.change(input, { target: { value: "abc" } });
 
         // Fast forward time (less than the debounce delay)
-        jest.advanceTimersByTime(200);
+        act(() => {
+            jest.advanceTimersByTime(200);
+        })
+
         expect(onChange).not.toHaveBeenCalled();
 
         // Fast forward past the debounce delay
-        jest.advanceTimersByTime(100);
+        act(() => {
+            jest.advanceTimersByTime(100);
+        })
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange).toHaveBeenCalledWith("abc");
     });
@@ -30,14 +34,16 @@ describe("DebounceInput", () => {
         const onChange = jest.fn();
         render(<DebounceInput onTimeout={onChange} delay={400} />);
 
-        const input = screen.getByTestId("search-input");
+        const input = screen.getByPlaceholderText("Search...");
 
         // Simulate typing and clearing the input quickly
         fireEvent.change(input, { target: { value: "text" } });
         fireEvent.change(input, { target: { value: "" } });
 
         // Fast forward time
-        jest.advanceTimersByTime(400);
+        act(() => {
+            jest.advanceTimersByTime(400);
+        })
         expect(onChange).not.toHaveBeenCalled();
     });
 
